@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .ProgressPerk__circle {
+    stroke: red;
+    fill: none;
+    stroke-width: 16px;
+    stroke-dasharray: 296px;
+    stroke-linecap: round;
+    stroke-dashoffset: 84;
+}
+.ProgressPerk__circle11 {
+    fill: #fff;
+    stroke-width: 7px;
+    transform: rotate(794deg);
+    transform-origin: 50% 50%;
+}
+.circleSmallDot {
+    fill: #999;
+    stroke-width: 6px;
+    stroke: #ffffffe6;
+    color: #ccc;
+    transform: rotate(794deg);
+    transform-origin: 50% 50%;
+}
+.ProgressPerk__svg {
+    height: 94%;
+    transform: rotate(132deg);
+    transform-origin: center;
+    width: 100%;
+}
+.ProgressPerk__progress_Main {
+    display: flex;
+    height: 100%;
+    width: 34px;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="ProgressPerk__progress_Main"><svg viewBox="0 0 115 115" class="ProgressPerk__svg">
+            <circle class="ProgressPerk__circle" cx="57" cy="57" r="48"></circle>
+            <circle class="ProgressPerk__circle11" cx="11" cy="46" r="9"></circle>
+            <circle class="circleSmallDot" cx="13" cy="38" r="11"></circle>
+            <defs>
+                <linearGradient id="red" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="100%" stop-color="#f96302" stop-opacity="0.9"></stop>
+                </linearGradient>
+            </defs>
+        </svg></div>
+</body>
+</html>
