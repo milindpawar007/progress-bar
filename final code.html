@@ -2,1531 +2,1603 @@
     // setTimeout(() => {
     //     init()
     // }, 4000);
-  let hasRun = false;
-    let init= (evt) =>
-    {
-        if (evt && evt.animationName === "welcomeCard") 
-        {
-              if (!hasRun) 
-              {
-                  hasRun = true;
-          console.log("welcomeCard")
-         console.log(new Date().toLocaleString() + new Date())
-       // const containerEle = document.getElementById("container");
-     // const containerEle =   document.querySelector("#root > div > div > div > div:nth-child(4) > div")
-     //    const containerEle = evt.target.parentNode;
-          const containerEle = evt.target.closest('div.grid');
-          console.log(containerEle)
-      // Loader
-        const loaderHtml = `
-        <div class="welcome-card-wrapper">
-            <div class="loader_wrapper">
-                <div class="loader">
-                    <div class="loader_animation">
-                        <div>
+    let hasRun = false;
+    let init = (evt) => {
+        if (evt && evt.animationName === "welcomeCard") {
+            if (!hasRun) {
+                hasRun = true;
+                console.log("welcomeCard")
+                console.log(new Date().toLocaleString() + new Date())
+                // const containerEle = document.getElementById("container");
+                // const containerEle =   document.querySelector("#root > div > div > div > div:nth-child(4) > div")
+                //    const containerEle = evt.target.parentNode;
+                const containerEle = evt.target.closest('div.grid');
+                 document.querySelector("#root > div > div > div > div:nth-child(4) > div > div > section > div > main > div:nth-child(1) > div > div > div > div.LoyaltySummary__spendLabel > span ")
+                console.log(containerEle)
+                // Loader
+                const loaderHtml = `
+          <div class="welcome-card-wrapper">
+              <div class="loader_wrapper">
+                  <div class="loader">
+                      <div class="loader_animation">
+                          <div>
+                          </div>
+                      </div>
+                  </div>
+              </div>  
+          </div>`;
+
+                // When module failed
+                const moduleFailedHtml = `
+          <div class="welcome-card-wrapper">
+              <div class="module_failed_wrapper">
+                  <div class="module_failed_content">
+                      <div class="module_failed_img_container">
+                          <img
+                              src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/Pro-Xtra_Perk_Icon-whiteFill.svg"
+                              alt="pro-extra-perk" class="WelcomeCardErrorPage__linkIcon" height="45px" width="45px"
+                              loading="lazy">
+                          <div class="module_failed_img_container_label">Check Back For Your Loyalty Status</div>
+                      </div>
+                      <div class="module_failed_refresh_container">
+                          <img
+                              src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/icon-refresh.svg"
+                              alt="refresh" class="module_failed_refresh_container_img " height="24px" width="24px"
+                              loading="lazy">
+                              <button
+                                  class="bttn-outline--e4t5c bttn--link--e4t5c bttn--transparent--e4t5c WelcomeCardErrorPage__subLink"
+                                  underline="true">
+                                  <span class="bttn__content--e4t5c">Refresh</span>
+                              </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          `
+                /// FUNCTION DECLARATIONS
+                const getCookie = (name) => {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) return parts.pop().split(";").shift();
+                };
+                const extractUserInfoData = (cookieString) => {
+                    const name = "THD_CUSTOMER=";
+                    const decodedCookie = decodeURIComponent(document.cookie);
+                    const ca = decodedCookie.split(";");
+                    let COOKIE_THD_CUSTOMER_VALUE;
+                    for (let i = 0; i < ca.length; i += 1) {
+                        let c = ca[i];
+                        while (c.charAt(0) === " ") {
+                            c = c.substring(1);
+                        }
+                        if (c.indexOf(name) === 0) {
+                            COOKIE_THD_CUSTOMER_VALUE = c.substring(name.length, c.length);
+                            break;
+                        }
+                    }
+                    COOKIE_THD_CUSTOMER_VALUE = COOKIE_THD_CUSTOMER_VALUE.replace(
+                        /"/g,
+                        ""
+                    ).substring(0, COOKIE_THD_CUSTOMER_VALUE.indexOf("."));
+                    return JSON.parse(atob(COOKIE_THD_CUSTOMER_VALUE));
+                };
+
+                const fetchUserData = async (userId, customerAccountId, cookieToken) => {
+                    const request =
+                        "https://www.homedepot.com/b2b/user/account/" +
+                        userId +
+                        "/customer/" +
+                        customerAccountId +
+                        "/homePage?";
+                    const headers = new Headers();
+                    headers.append("Content-Type", "application/json");
+                    headers.append("channelid", "1");
+                    headers.append("Cookie", cookieToken);
+                    const options = {
+                        method: "GET",
+                        headers: headers,
+                        mode: "cors",
+                        cache: "default",
+                        redirect: "follow",
+                    };
+                    const response = fetch(request, options);
+                    return response
+                        .then(function (data) {
+                            return data
+                                .json()
+                                .then(function (jsonResponse) {
+                                    return jsonResponse;
+                                })
+                                .catch(function (err) {
+                                    return err;
+                                });
+                        })
+                        .catch(function (err) {
+                            return err;
+                        });
+                };
+
+                const fetchPerks = async (userId, customerAccountId, cookieToken) => {
+                    const request =
+                        "https://www.homedepot.com/b2b/user/account/" +
+                        userId +
+                        "/customer/" +
+                        customerAccountId +
+                        "/perks/available";
+                    const headers = new Headers();
+                    headers.append("Content-Type", "application/json");
+                    headers.append("channelid", "1");
+                    headers.append("Cookie", cookieToken);
+                    const options = {
+                        method: "GET",
+                        headers: headers,
+                        mode: "cors",
+                        cache: "default",
+                        redirect: "follow",
+                    };
+                    const response = fetch(request, options);
+                    return response
+                        .then(function (data) {
+                            return data
+                                .json()
+                                .then(function (jsonResponse) {
+                                    return jsonResponse;
+                                })
+                                .catch(function (err) {
+                                    return err;
+                                });
+                        })
+                        .catch(function (err) {
+                            return err;
+                        });
+                };
+
+                //// Check for perk
+
+                const checkForPerk = (userData, userPerk) => {
+                    let perkContent = '';
+                    try {
+                        let destLink = "https://www.homedepot.com/b2b/account/view/proXtraPerks";
+                        if (userData.perkSummary.unclaimedPerksCount === 0 && userData.perkSummary.activePerksCount == false && userData.perkSummary.accrualData.finalTierPerkAchieved === true) {
+                            let custName = userData.userProfile.name.firstName + " " + userData.userProfile.name.lastName;
+                            let PerksProgramImage = "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg";
+
+                            perkContent = `
+                  <a class="perk_completed" href="`+ destLink + `" rel=" noreferrer">
+                    <div class="perk_completed_img">
+                        <img src="`+ PerksProgramImage + `" height="44px" width="44px" loading="lazy">
+                    </div>
+                    <div class="perk_completed_content">
+                        <div class="heading">
+                            Well done,
+                            <p style="font-weight:400;">`+ custName + `</p>
+                        </div>
+                        <div class="perk_completed_content_link">
+                            <u>View Your Perks</u>
                         </div>
                     </div>
-                </div>
-            </div>  
-        </div>`;
-
-        // When module failed
-        const moduleFailedHtml = `
-        <div class="welcome-card-wrapper">
-            <div class="module_failed_wrapper">
-                <div class="module_failed_content">
-                    <div class="module_failed_img_container">
-                        <img
-                            src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/Pro-Xtra_Perk_Icon-whiteFill.svg"
-                            alt="pro-extra-perk" class="WelcomeCardErrorPage__linkIcon" height="45px" width="45px"
-                            loading="lazy">
-                        <div class="module_failed_img_container_label">Check Back For Your Loyalty Status</div>
+                    <div class="perk_completed_arrow">
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                      
                     </div>
-                    <div class="module_failed_refresh_container">
-                        <img
-                            src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/icon-refresh.svg"
-                            alt="refresh" class="module_failed_refresh_container_img " height="24px" width="24px"
-                            loading="lazy">
-                            <button
-                                class="bttn-outline--e4t5c bttn--link--e4t5c bttn--transparent--e4t5c WelcomeCardErrorPage__subLink"
-                                underline="true">
-                                <span class="bttn__content--e4t5c">Refresh</span>
-                            </button>
+                  </a>`
+                        } else if (userPerk.expiringPerks > 0) {
+                            let expiringPerks = userPerk.expiringPerks;
+
+                            let PerksProgramImage =
+                                "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg";
+                            perkContent = `
+                  <a class="perk_completed" href="`+ destLink + `" rel=" noreferrer">
+                      <div class="perk_completed_img">
+                          <img src="`+ PerksProgramImage + `" height="44px" width="44px" loading="lazy">
+                      </div>
+                      <div class="perk_completed_content">
+                          <div class="heading">
+                            `+ expiringPerks + ` Perks Expiring sooon,
+                          </div>
+                          <div class="perk_completed_content_link">
+                              <u>View Your Perks</u>
+                          </div>
+                      </div>
+                      <div class="perk_completed_arrow">
+                        <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
+                      </div>
+                  </a>
+                `
+                        } else if (userData.perkSummary.unclaimedPerksCount > 0) {
+                            let PerksUnlockedImage =
+                                "https://assets.thdstatic.com/images/v1/loyaltyBenefits/badge-unlocked.svg";
+                            perkContent = `
+                  <a class="perk_completed" href="`+ destLink + `" rel=" noreferrer">
+                    <div class="perk_completed_img">
+                        <img src="`+ PerksUnlockedImage + `" height="44px" width="44px" loading="lazy">
                     </div>
-                </div>
-            </div>
-        </div>
-        `
-        /// FUNCTION DECLARATIONS
-        const getCookie = (name) => {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(";").shift();
-        };
-        const extractUserInfoData = (cookieString) => {
-            const name = "THD_CUSTOMER=";
-            const decodedCookie = decodeURIComponent(document.cookie);
-            const ca = decodedCookie.split(";");
-            let COOKIE_THD_CUSTOMER_VALUE;
-            for (let i = 0; i < ca.length; i += 1) {
-                let c = ca[i];
-                while (c.charAt(0) === " ") {
-                    c = c.substring(1);
-                }
-                if (c.indexOf(name) === 0) {
-                    COOKIE_THD_CUSTOMER_VALUE = c.substring(name.length, c.length);
-                    break;
-                }
-            }
-            COOKIE_THD_CUSTOMER_VALUE = COOKIE_THD_CUSTOMER_VALUE.replace(
-                /"/g,
-                ""
-            ).substring(0, COOKIE_THD_CUSTOMER_VALUE.indexOf("."));
-            return JSON.parse(atob(COOKIE_THD_CUSTOMER_VALUE));
-        };
-
-        const fetchUserData = async (userId, customerAccountId, cookieToken) => {
-            const request =
-                "https://www.homedepot.com/b2b/user/account/" +
-                userId +
-                "/customer/" +
-                customerAccountId +
-                "/homePage?";
-            const headers = new Headers();
-            headers.append("Content-Type", "application/json");
-            headers.append("channelid", "1");
-            headers.append("Cookie", cookieToken);
-            const options = {
-                method: "GET",
-                headers: headers,
-                mode: "cors",
-                cache: "default",
-                redirect: "follow",
-            };
-            const response = fetch(request, options);
-            return response
-                .then(function (data) {
-                    return data
-                        .json()
-                        .then(function (jsonResponse) {
-                            return jsonResponse;
-                        })
-                        .catch(function (err) {
-                            return err;
-                        });
-                })
-                .catch(function (err) {
-                    return err;
-                });
-        };
-
-        const fetchPerks = async (userId, customerAccountId, cookieToken) => {
-            const request =
-                "https://www.homedepot.com/b2b/user/account/" +
-                userId +
-                "/customer/" +
-                customerAccountId +
-                "/perks/available";
-            const headers = new Headers();
-            headers.append("Content-Type", "application/json");
-            headers.append("channelid", "1");
-            headers.append("Cookie", cookieToken);
-            const options = {
-                method: "GET",
-                headers: headers,
-                mode: "cors",
-                cache: "default",
-                redirect: "follow",
-            };
-            const response = fetch(request, options);
-            return response
-                .then(function (data) {
-                    return data
-                        .json()
-                        .then(function (jsonResponse) {
-                            return jsonResponse;
-                        })
-                        .catch(function (err) {
-                            return err;
-                        });
-                })
-                .catch(function (err) {
-                    return err;
-                });
-        };
-
-        //// Check for perk
-
-        const checkForPerk = (userData, userPerk) => {
-            let perkContent = '';
-            try {
-                let destLink = "https://www.homedepot.com/b2b/account/view/proXtraPerks";
-                if (userData.perkSummary.unclaimedPerksCount === 0 && userData.perkSummary.activePerksCount == false && userData.perkSummary.accrualData.finalTierPerkAchieved === true) {
-                    let custName = userData.userProfile.name.firstName + " " + userData.userProfile.name.lastName;
-                    let PerksProgramImage = "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg";
-
-                    perkContent = `
-                <a class="perk_completed" href="`+destLink+`" rel=" noreferrer">
-                  <div class="perk_completed_img">
-                      <img src="`+PerksProgramImage+`" height="44px" width="44px" loading="lazy">
-                  </div>
-                  <div class="perk_completed_content">
-                      <div class="heading">
-                          Well done,
-                          <p style="font-weight:400;">`+custName+`</p>
-                      </div>
-                      <div class="perk_completed_content_link">
-                          <u>View Your Perks</u>
-                      </div>
-                  </div>
-                  <div class="perk_completed_arrow">
-                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                      
-                  </div>
+                    <div class="perk_completed_content">
+                        <div class="heading">
+                          New Perk Unlocked
+                        </div>
+                        <div class="perk_completed_content_link">
+                            <u>choose perk</u>
+                        </div>
+                    </div>
+                    <div class="perk_completed_arrow">
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
+                    </div>
                 </a>`
-                } else if (userPerk.expiringPerks > 0) {
-                    let expiringPerks = userPerk.expiringPerks;
-                
-                    let PerksProgramImage =
-                        "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg";
-                    perkContent = `
-                <a class="perk_completed" href="`+destLink+`" rel=" noreferrer">
-                    <div class="perk_completed_img">
-                        <img src="`+PerksProgramImage+`" height="44px" width="44px" loading="lazy">
-                    </div>
-                    <div class="perk_completed_content">
-                        <div class="heading">
-                          `+expiringPerks+` Perks Expiring sooon,
-                        </div>
-                        <div class="perk_completed_content_link">
-                            <u>View Your Perks</u>
-                        </div>
-                    </div>
-                    <div class="perk_completed_arrow">
-                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                    </div>
-                </a>
-              `
-                } else if (userData.perkSummary.unclaimedPerksCount > 0) {
-                    let PerksUnlockedImage =
-                        "https://assets.thdstatic.com/images/v1/loyaltyBenefits/badge-unlocked.svg";
-                    perkContent = `
-                <a class="perk_completed" href="`+destLink+`" rel=" noreferrer">
+                        } else if (userData.perkSummary.activePerksCount) {
+                            if (userPerk.availablePerks > 0) {
+
+                                let availablePerks = userPerk.availablePerks;
+                                let PerksProgramImage =
+                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg";
+
+                                perkContent = `
+                  <a class="perk_completed" href="`+ destLink + `" rel=" noreferrer">
+                      <div class="perk_completed_img">
+                          <img src="`+ PerksProgramImage + `" height="44px" width="44px" loading="lazy">
+                      </div>
+                      <div class="perk_completed_content">
+                          <div class="heading">
+                            `+ availablePerks + ` Perks Available
+                          </div>
+                          <div class="perk_completed_content_link">
+                              <u>View Your Perks</u>
+                          </div>
+                      </div>
+                      <div class="perk_completed_arrow">
+                        <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
+                      </div>
+                  </a>`;
+                            }
+                        } else if (userData.perkSummary.pxccUserCategory === "Enrolled") {
+                            let amount = userData.perkSummary.accrualData[0].spendForNextPerkWithPxcc;
+                            let PerksPLCCImage =
+                                "https://assets.thdstatic.com/images/v1/loyaltyBenefits/plcc-4x.svg";
+
+                            perkContent = `
+                <a class="perk_completed" href="`+ destLink + `" rel=" noreferrer">
                   <div class="perk_completed_img">
-                      <img src="`+PerksUnlockedImage+`" height="44px" width="44px" loading="lazy">
+                      <img src="`+ PerksPLCCImage + `" height="44px" width="44px" loading="lazy">
                   </div>
                   <div class="perk_completed_content">
                       <div class="heading">
-                        New Perk Unlocked
+                          $`+ amount + `<span style="font-weight: 400;">Until next perk with</span>
+                          <p style="font-weight: 400;">Pro extra credit card</p>
                       </div>
                       <div class="perk_completed_content_link">
-                          <u>choose perk</u>
+                          <u>View Your Perks</u>
                       </div>
                   </div>
                   <div class="perk_completed_arrow">
                     <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
                   </div>
-              </a>`
-                } else if (userData.perkSummary.activePerksCount) {
-                    if (userPerk.availablePerks > 0) {
-                        
-                        let availablePerks = userPerk.availablePerks;
-                        let PerksProgramImage =
-                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg";
-
+                </a>          
+              `;
+                        } else {
+                            //   let percentage = userData.perkSummary.perkCurrentTierProgressPercentage;
+                            let percentage = 30;
+                            let progress = 300 - ((percentage / 100) * 229);
+                            let amount = userData.perkSummary.accrualData[0].spendForNextPerk;
+                            perkContent = `
+                <a class="perk_completed" href="`+ destLink + `" rel=" noreferrer">
+                  <div class="perk_completed_img">
+                     <svg viewBox="0 0 115 115" class="perks_content_progressPerk__svg">
+                      <circle class="perks_content_progressPerk__circle" cx="57" cy="57" r="48" />
+                      <defs>
+                          <linearGradient id="red" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="100%" stopColor="#f96302" stopOpacity="0.9" />
+                          </linearGradient>
+                      </defs>
+                      <circle
+                          class="perks_content_circle_border"
+                          stroke-dashoffset="`+ progress + `"
+                          cx="57"
+                          cy="57"
+                          r="48"
+                          stroke="#FFFFFF"
+                      />
+                      <circle
+                          class="perks_content_progressPerk__circleProgress"
+                          stroke-dashoffset="`+ progress + `"
+                          cx="57"
+                          cy="57"
+                          r="48"
+                          stroke="#F96302"
+                      />
+                      <circle class="perk_circleSmallDot" style="transform:rotate(`+ (2.8 * percentage - 214) + `deg)" 
+                      cx="13" cy="38" r="11"></circle>
+                    </svg>
+                  </div>
+                  <div class="perk_completed_content">
+                      <div class="heading">
+                          $`+ amount + ` Until Next Perk
+                      </div>
+                      <div class="perk_completed_content_link">
+                          <u>View Your Perks</u>
+                      </div>
+                  </div>
+                  <div class="perk_completed_arrow">
+                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
+                  </div>
+              </a> `
+                        }
+                    }
+                    catch (e) {
                         perkContent = `
-                <a class="perk_completed" href="`+destLink+`" rel=" noreferrer">
-                    <div class="perk_completed_img">
-                        <img src="`+ PerksProgramImage +`" height="44px" width="44px" loading="lazy">
-                    </div>
-                    <div class="perk_completed_content">
-                        <div class="heading">
-                          `+availablePerks+` Perks Available
-                        </div>
-                        <div class="perk_completed_content_link">
-                            <u>View Your Perks</u>
-                        </div>
-                    </div>
-                    <div class="perk_completed_arrow">
-                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                    </div>
-                </a>`;
-                    }
-                } else if (userData.perkSummary.pxccUserCategory === "Enrolled") {
-                    let amount = userData.perkSummary.accrualData[0].spendForNextPerkWithPxcc;
-                    let PerksPLCCImage =
-                        "https://assets.thdstatic.com/images/v1/loyaltyBenefits/plcc-4x.svg";
-
-                    perkContent = `
-              <a class="perk_completed" href="`+destLink+`" rel=" noreferrer">
+              <a class="perk_completed" href="" rel=" noreferrer">
                 <div class="perk_completed_img">
-                    <img src="`+PerksPLCCImage+`" height="44px" width="44px" loading="lazy">
+                    <img src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg" height="44px" width="44px" loading="lazy">
                 </div>
                 <div class="perk_completed_content">
                     <div class="heading">
-                        $`+amount+`<span style="font-weight: 400;">Until next perk with</span>
-                        <p style="font-weight: 400;">Pro extra credit card</p>
+                      <p style="width: 234px;height: 20px;color: #7A7978;font-size: 16px;font-style: normal;">Perks Status Unavailable</p>
                     </div>
                     <div class="perk_completed_content_link">
-                        <u>View Your Perks</u>
+                        <u>Refresh</u>
                     </div>
                 </div>
-                <div class="perk_completed_arrow">
-                  <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                </div>
-              </a>          
-            `;
-                } else {
-                    let percentage = userData.perkSummary.perkCurrentTierProgressPercentage;
-                    let progress = 300 - (percentage / 100) * 229;
-                    let amount = userData.perkSummary.accrualData[0].spendForNextPerk;
-                    perkContent = `
-              <a class="perk_completed" href="`+destLink+`" rel=" noreferrer">
-                <div class="perk_completed_img">
-                   <svg viewBox="0 0 115 115" class="perks_content_progressPerk__svg">
-                    <circle class="perks_content_progressPerk__circle" cx="57" cy="57" r="48" />
-                    <defs>
-                        <linearGradient id="red" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="100%" stopColor="#f96302" stopOpacity="0.9" />
-                        </linearGradient>
-                    </defs>
-                    <circle
-                        class="perks_content_circle_border perks_content_circle-animate"
-                        stroke-dashoffset="`+progress+`"
-                        cx="57"
-                        cy="57"
-                        r="48"
-                        stroke="#FFFFFF"
-                    />
-                    <circle
-                        class="perks_content_progressPerk__circleProgress perks_content_circle-animate"
-                        stroke-dashoffset="`+progress+`"
-                        cx="57"
-                        cy="57"
-                        r="48"
-                        stroke="#F96302"
-                    />
-                    <circle class="perk_circleSmallDot" style="transform:rotate(`+(-220 + progress)+`}deg)" 
-                    cx="13" cy="38" r="11"></circle>
-                  </svg>
-                </div>
-                <div class="perk_completed_content">
-                    <div class="heading">
-                        $`+amount+` Until Next Perk
-                    </div>
-                    <div class="perk_completed_content_link">
-                        <u>View Your Perks</u>
-                    </div>
-                </div>
-                <div class="perk_completed_arrow">
-                  <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                </div>
-            </a> `
-                }
-            }
-            catch (e) {
-                perkContent = `
-            <a class="perk_completed" href="" rel=" noreferrer">
-              <div class="perk_completed_img">
-                  <img src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg" height="44px" width="44px" loading="lazy">
-              </div>
-              <div class="perk_completed_content">
-                  <div class="heading">
-                    <p style="width: 234px;height: 20px;color: #7A7978;font-size: 16px;font-style: normal;">Perks Status Unavailable</p>
-                  </div>
-                  <div class="perk_completed_content_link">
-                      <u>Refresh</u>
-                  </div>
-              </div>
-            </a>`
-            }
-           
-            const perksContentEle = document.getElementById("perks_content");
-            console.log(new Date().toLocaleString() + new Date())
-            console.log(perksContentEle)
-            console.log(perkContent)
-            if(perksContentEle !== null)
-            {
-              perksContentEle.innerHTML = perkContent;
-            }
-        };
+              </a>`
+                    }
 
-        const checkForOffer = (userData, userPerk) => {
-            let offer_content = '';
-            try {
-                if (userData.proTiers.currentTierName.toLowerCase() === "member") 
-                {
-                    //1. number of offers expiring
-                    if (userData.perkSummary.availabelActiveOffers == true && userPerk.expiringOffers > 0)
-                     {
-                        //condition 1
-                        let expiringOffers = userPerk.expiringOffers;
-                        let DestLink =
-                            "https://www.homedepot.com/myaccount/proxtraprogramdetails";
-                        let expiringOffersImage =
-                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
-                        offer_content = `
-                <a class="offer_link"
-                  href="`+destLink+`" rel=" noreferrer">
-                  <div class="offer_link_image">
-                      <img
-                          src="`+expiringOffersImage+`"
-                          alt="paintImage" height="44px" width="44px" loading="lazy">
-                  </div>
-                  <div class="offer_content">
-                      <div class="heading">
-                          `+expiringOffers+`Offers Expiring Soon
-                      </div>
-                      <div class="offer_content_link">
-                          <u>View Your Perks</u>
-                      </div>    
-                  </div>
-                  <div class="offer_link_arrow">
-                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                  </div>
-                </a>`;
+                    const perksContentEle = document.getElementById("perks_content");
+                    console.log(new Date().toLocaleString() + new Date())
+                    console.log(perksContentEle)
+                    console.log(perkContent)
+                    if (perksContentEle !== null) {
+                        perksContentEle.innerHTML = perkContent;
                     }
-                    // 2.number of available offers
-                    else if (userData.perkSummary.availabelActiveOffers == true && userPerk.availableOffers > 0) {
-                        // condition 2
-                        let availableOffers = userPerk.availableOffers;
-                        let DestLink =
-                            "https://www.homedepot.com/myaccount/proxtraprogramdetails";
-                        let availableOffersImage =
-                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
-                        offer_content = `
-                <a class="offer_link"
-                  href="`+ DestLink +`" rel=" noreferrer">
-                  <div class="offer_link_image">
-                      <img
-                          src="`+availableOffersImage+`"
-                          alt="paintImage" height="44px" width="44px" loading="lazy">
-                  </div>
-                  <div class="offer_content">
-                      <div class="heading">
-                          `+availableOffers+`Offers Available
-                      </div>
-                      <div class="offer_content_link">
-                          <u>View Your Perks</u>
-                      </div>    
-                  </div>
-                  <div class="offer_link_arrow">
-                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                  </div>
-                </a>`;
-                    }
-                    //4.preferred pricing unlocked
-                    else if (userData.customerInfo.enrolledInPreferredPricing === true && userData.customerInfo.preferredPricingTierZero === true) {
-                        // condition 3
-                        let DestLink =
-                            "https://www.homedepot.com/b2b/account/view/proXtraPricing ";
-                        let PreferredPricingImage =
-                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PreferredPricing.svg";
-                        offer_content = `
-                <a class="offer_link"
-                  href="`+ DestLink +`" rel=" noreferrer">
-                  <div class="offer_link_image">
-                      <img
-                          src="`+PreferredPricingImage+`"
-                          alt="paintImage" height="44px" width="44px" loading="lazy">
-                  </div>
-                  <div class="offer_content">
-                      <div class="heading">
-                          Preffered Pricing Unlocked
-                      </div>
-                      <div class="offer_content_link">
-                          <u>Learn More</u>
-                      </div>    
-                  </div>
-                  <div class="offer_link_arrow">
-                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                  </div>
-                </a>`;
-                    }
-                    //5.paint rewards available using paint rewards logic
-                    else {
-                        if (userData.customerInfo.paintMembershipLevel) {
-                            let paintMembershipLevel = userData.customerInfo.paintMembershipLevel;
-                            let paintImage = '';
-                            let pagaraphContent = '';
-                            let DestLink =
-                                "https://www.homedepot.com/myaccount/proxtraprogramdetails";
+                };
 
-                            if (paintMembershipLevel === "Member") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Member-square.svg";
-                                pagaraphContent = `Saved Up To 20% <p style="font-weight:400;">After Qualifying Spend</p>`;
-                            } else if (paintMembershipLevel === "Bronze") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Bronze-square.svg";
-                                pagaraphContent = `Save Upto 10% <div>On Paint Products</div>`;
-                            } else if (paintMembershipLevel === "Silver") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Silver-square.svg";
-                                pagaraphContent = `Save Upto 15% <div>On Paint Products</div>`;
-                            } else if (paintMembershipLevel === "Gold") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Gold-square.svg";
-                                pagaraphContent = `Save Upto 20% <div>On Paint Products</div>`;
-                            }
-                            offer_content = `
+                const checkForOffer = (userData, userPerk) => {
+                    let offer_content = '';
+                    try {
+                        if (userData.proTiers.currentTierName.toLowerCase() === "member") {
+                            //1. number of offers expiring
+                            if (userData.perkSummary.availabelActiveOffers == true && userPerk.expiringOffers > 0) {
+                                //condition 1
+                                let expiringOffers = userPerk.expiringOffers;
+                                let DestLink =
+                                    "https://www.homedepot.com/myaccount/proxtraprogramdetails";
+                                let expiringOffersImage =
+                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
+                                offer_content = `
                   <a class="offer_link"
-                    href="`+DestLink+`" rel=" noreferrer">
+                    href="`+ destLink + `" rel=" noreferrer">
                     <div class="offer_link_image">
                         <img
-                            src="`+paintImage+`"
+                            src="`+ expiringOffersImage + `"
                             alt="paintImage" height="44px" width="44px" loading="lazy">
                     </div>
                     <div class="offer_content">
                         <div class="heading">
-                            `+pagaraphContent+`
+                            `+ expiringOffers + `Offers Expiring Soon
                         </div>
                         <div class="offer_content_link">
-                            <u>View Paint Rewards</u>
+                            <u>View Your Perks</u>
                         </div>    
                     </div>
                     <div class="offer_link_arrow">
-                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                        
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
                     </div>
                   </a>`;
-                        }
-                    }
-                }
-                else if (userData.proTiers.currentTierName.toLowerCase() === "elite" || userData.proTiers.currentTierName.toLowerCase() === "vip") {
-                    //1. number of offers expiring   availableActiveOffers
-                    console.log(userData.perkSummary.availableActiveOffers)
-                    console.log(userPerk.expiringOffers)
-                    if (userData.perkSummary.availableActiveOffers === true && userPerk.expiringOffers > 0) {
-                        let DestLink =
-                            "https://www.homedepot.com/myaccount/proxtraprogramdetails";
-                        let expiringOffersImage =
-                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
-                        let expiringOffers = userPerk.expiringOffers;
-                        offer_content = `
-                <a class="offer_link"
-                  href="`+ DestLink +`" rel=" noreferrer">
-                  <div class="offer_link_image">
-                      <img
-                          src="`+expiringOffersImage+`"
-                          alt="paintImage" height="44px" width="44px" loading="lazy">
-                  </div>
-                  <div class="offer_content">
-                      <div class="heading">
-                          `+expiringOffers+` Offers Expiring Soon
-                      </div>
-                      <div class="offer_content_link">
-                          <u>View Your Perks</u>
-                      </div>    
-                  </div>
-                  <div class="offer_link_arrow">
-                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                  </div>
-                </a>`;
-                    }
-                    // 2.number of available offers
-                    else if (userData.perkSummary.availabelActiveOffers == true && userPerk.availableOffers > 0) {
-                        // condition 2
-                        let availableOffers = userPerk.availableOffers;
-                        let DestLink =
-                            "https://www.homedepot.com/myaccount/proxtraprogramdetails";
-                        let availableOffersImage =
-                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
-                        offer_content = `
-                <a class="offer_link"
-                  href="`+ DestLink +`" rel=" noreferrer">
-                  <div class="offer_link_image">
-                      <img
-                          src="`+availableOffersImage+`"
-                          alt="paintImage" height="44px" width="44px" loading="lazy">
-                  </div>
-                  <div class="offer_content">
-                      <div class="heading">
-                          `+availableOffers+` Offers Available
-                      </div>
-                      <div class="offer_content_link">
-                          <u>View Your Perks</u>
-                      </div>    
-                  </div>
-                  <div class="offer_link_arrow">
-                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                      
-                  </div>
-                </a>`;
-                    }
-                    //3.NO Offer ESL: phone number
-                    else if (userData.proTiers.benefitTags.length > 0) {
-                        let EliteSupportLine= "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-EliteSupportLine.svg"
-                        let destLink = "https://www.homedepot.com/b2b/account/view/proXtraPricing ";
-                        let phoneNumberArray = userData.proTiers.benefitTags.find(
-                            (x) => x.tagName === "eliteCallCenter"
-                        );
-                        if (phoneNumberArray) {
-                            let phoneNumber = phoneNumberArray.value;
-                            offer_content = `
-                <a class="offer_link"
-                  href="`+destLink+`" rel=" noreferrer">
-                  <div class="offer_link_image">
-                      <img
-                          src="`+ EliteSupportLine +`"
-                          alt="paintImage" height="44px" width="44px" loading="lazy">
-                  </div>
-                  <div class="offer_content">
-                      <div class="heading">
-                          <div>Contact</div>
-                          <div>Elite Support Line</div>
-                      </div>
-                      <div class="offer_content_link">
-                          <u>`+phoneNumber+`</u>
-                      </div>    
-                  </div>
-                  <div class="offer_link_arrow">
-                    <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
-                  </div>
-                </a>`;
-                        }
-                    }
-
-                    //4.preferred pricing unlocked
-                    else if (userData.customerInfo.enrolledInPreferredPricing === true && userData.customerInfo.preferredPricingTierZero === true) {
-                        // condition 3
-                        let DestLink =
-                            "https://www.homedepot.com/b2b/account/view/proXtraPricing ";
-                        let PreferredPricingImage =
-                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PreferredPricing.svg";
-                        offer_content = `
+                            }
+                            // 2.number of available offers
+                            else if (userData.perkSummary.availabelActiveOffers == true && userPerk.availableOffers > 0) {
+                                // condition 2
+                                let availableOffers = userPerk.availableOffers;
+                                let DestLink =
+                                    "https://www.homedepot.com/myaccount/proxtraprogramdetails";
+                                let availableOffersImage =
+                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
+                                offer_content = `
                   <a class="offer_link"
-                    href="`+ DestLink +`" rel=" noreferrer">
+                    href="`+ DestLink + `" rel=" noreferrer">
                     <div class="offer_link_image">
                         <img
-                            src="`+PreferredPricingImage+`"
+                            src="`+ availableOffersImage + `"
                             alt="paintImage" height="44px" width="44px" loading="lazy">
                     </div>
                     <div class="offer_content">
                         <div class="heading">
-                            <div>Preffered Pricing</div>
-                            <div>Unlocked</div>
+                            `+ availableOffers + `Offers Available
+                        </div>
+                        <div class="offer_content_link">
+                            <u>View Your Perks</u>
+                        </div>    
+                    </div>
+                    <div class="offer_link_arrow">
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
+                    </div>
+                  </a>`;
+                            }
+                            //4.preferred pricing unlocked
+                            else if (userData.customerInfo.enrolledInPreferredPricing === true && userData.customerInfo.preferredPricingTierZero === true) {
+                                // condition 3
+                                let DestLink =
+                                    "https://www.homedepot.com/b2b/account/view/proXtraPricing ";
+                                let PreferredPricingImage =
+                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PreferredPricing.svg";
+                                offer_content = `
+                  <a class="offer_link"
+                    href="`+ DestLink + `" rel=" noreferrer">
+                    <div class="offer_link_image">
+                        <img
+                            src="`+ PreferredPricingImage + `"
+                            alt="paintImage" height="44px" width="44px" loading="lazy">
+                    </div>
+                    <div class="offer_content">
+                        <div class="heading">
+                            Preffered Pricing Unlocked
                         </div>
                         <div class="offer_content_link">
                             <u>Learn More</u>
                         </div>    
                     </div>
                     <div class="offer_link_arrow">
-                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                       
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
                     </div>
                   </a>`;
-                    }
-
-                    //5.paint rewards available using paint rewards logic
-                    else {
-                        if (userData.customerInfo.paintMembershipLevel) {
-                            let paintMembershipLevel = userData.customerInfo.paintMembershipLevel;
-                            let paintImage = '';
-                            let pagaraphContent = '';
-                            let DestLink =
-                                "https://www.homedepot.com/myaccount/proxtraprogramdetails";
-
-                            if (paintMembershipLevel === "Member") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Member-square.svg";
-                                pagaraphContent = `Saved Up To 20% <p style="font-weight:400;">After Qualifying Spend</p>`;
-                            } else if (paintMembershipLevel === "Bronze") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Bronze-square.svg";
-                                pagaraphContent = `Save Upto 10% <div>On Paint Products</div>`;
-                            } else if (paintMembershipLevel === "Silver") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Silver-square.svg";
-                                pagaraphContent = `Save Upto 15% <div>On Paint Products</div>`;
-                            } else if (paintMembershipLevel === "Gold") {
-                                paintImage =
-                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Gold-square.svg";
-                                pagaraphContent = `Save Upto 20% <div>On Paint Products</div>`;
                             }
-                            offer_content = `
+                            //5.paint rewards available using paint rewards logic
+                            else {
+                                if (userData.customerInfo.paintMembershipLevel) {
+                                    let paintMembershipLevel = userData.customerInfo.paintMembershipLevel;
+                                    let paintImage = '';
+                                    let pagaraphContent = '';
+                                    let DestLink =
+                                        "https://www.homedepot.com/myaccount/proxtraprogramdetails";
+
+                                    if (paintMembershipLevel === "Member") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Member-square.svg";
+                                        pagaraphContent = `Saved Up To 20% <p style="font-weight:400;">After Qualifying Spend</p>`;
+                                    } else if (paintMembershipLevel === "Bronze") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Bronze-square.svg";
+                                        pagaraphContent = `Save Upto 10% <div>On Paint Products</div>`;
+                                    } else if (paintMembershipLevel === "Silver") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Silver-square.svg";
+                                        pagaraphContent = `Save Upto 15% <div>On Paint Products</div>`;
+                                    } else if (paintMembershipLevel === "Gold") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Gold-square.svg";
+                                        pagaraphContent = `Save Upto 20% <div>On Paint Products</div>`;
+                                    }
+                                    offer_content = `
+                    <a class="offer_link"
+                      href="`+ DestLink + `" rel=" noreferrer">
+                      <div class="offer_link_image">
+                          <img
+                              src="`+ paintImage + `"
+                              alt="paintImage" height="44px" width="44px" loading="lazy">
+                      </div>
+                      <div class="offer_content">
+                          <div class="heading">
+                              `+ pagaraphContent + `
+                          </div>
+                          <div class="offer_content_link">
+                              <u>View Paint Rewards</u>
+                          </div>    
+                      </div>
+                      <div class="offer_link_arrow">
+                        <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                        
+                      </div>
+                    </a>`;
+                                }
+                            }
+                        }
+                        else if (userData.proTiers.currentTierName.toLowerCase() === "elite" || userData.proTiers.currentTierName.toLowerCase() === "vip") {
+                            //1. number of offers expiring   availableActiveOffers
+                            console.log(userData.perkSummary.availableActiveOffers)
+                            console.log(userPerk.expiringOffers)
+                            if (userData.perkSummary.availableActiveOffers === true && userPerk.expiringOffers > 0) {
+                                let DestLink =
+                                    "https://www.homedepot.com/myaccount/proxtraprogramdetails";
+                                let expiringOffersImage =
+                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
+                                let expiringOffers = userPerk.expiringOffers;
+                                offer_content = `
                   <a class="offer_link"
-                    href="`+DestLink+`" rel=" noreferrer">
+                    href="`+ DestLink + `" rel=" noreferrer">
                     <div class="offer_link_image">
                         <img
-                            src="`+paintImage+`"
+                            src="`+ expiringOffersImage + `"
                             alt="paintImage" height="44px" width="44px" loading="lazy">
                     </div>
                     <div class="offer_content">
                         <div class="heading">
-                            `+pagaraphContent+`
+                            `+ expiringOffers + ` Offers Expiring Soon
                         </div>
                         <div class="offer_content_link">
-                            <u>View Paint Rewards</u>
+                            <u>View Your Perks</u>
                         </div>    
                     </div>
                     <div class="offer_link_arrow">
-                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                        
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
                     </div>
-                  </a>`
+                  </a>`;
+                            }
+                            // 2.number of available offers
+                            else if (userData.perkSummary.availabelActiveOffers == true && userPerk.availableOffers > 0) {
+                                // condition 2
+                                let availableOffers = userPerk.availableOffers;
+                                let DestLink =
+                                    "https://www.homedepot.com/myaccount/proxtraprogramdetails";
+                                let availableOffersImage =
+                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PersonalOffers-square.svg";
+                                offer_content = `
+                  <a class="offer_link"
+                    href="`+ DestLink + `" rel=" noreferrer">
+                    <div class="offer_link_image">
+                        <img
+                            src="`+ availableOffersImage + `"
+                            alt="paintImage" height="44px" width="44px" loading="lazy">
+                    </div>
+                    <div class="offer_content">
+                        <div class="heading">
+                            `+ availableOffers + ` Offers Available
+                        </div>
+                        <div class="offer_content_link">
+                            <u>View Your Perks</u>
+                        </div>    
+                    </div>
+                    <div class="offer_link_arrow">
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                      
+                    </div>
+                  </a>`;
+                            }
+                            //3.NO Offer ESL: phone number
+                            else if (userData.proTiers.benefitTags.length > 0) {
+                                let EliteSupportLine = "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-EliteSupportLine.svg"
+                                let destLink = "https://www.homedepot.com/b2b/account/view/proXtraPricing ";
+                                let phoneNumberArray = userData.proTiers.benefitTags.find(
+                                    (x) => x.tagName === "eliteCallCenter"
+                                );
+                                if (phoneNumberArray) {
+                                    let phoneNumber = phoneNumberArray.value;
+                                    offer_content = `
+                  <a class="offer_link"
+                    href="`+ destLink + `" rel=" noreferrer">
+                    <div class="offer_link_image">
+                        <img
+                            src="`+ EliteSupportLine + `"
+                            alt="paintImage" height="44px" width="44px" loading="lazy">
+                    </div>
+                    <div class="offer_content">
+                        <div class="heading">
+                            <div>Contact</div>
+                            <div>Elite Support Line</div>
+                        </div>
+                        <div class="offer_content_link">
+                            <u>`+ phoneNumber + `</u>
+                        </div>    
+                    </div>
+                    <div class="offer_link_arrow">
+                      <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>
+                    </div>
+                  </a>`;
+                                }
+                            }
+
+                            //4.preferred pricing unlocked
+                            else if (userData.customerInfo.enrolledInPreferredPricing === true && userData.customerInfo.preferredPricingTierZero === true) {
+                                // condition 3
+                                let DestLink =
+                                    "https://www.homedepot.com/b2b/account/view/proXtraPricing ";
+                                let PreferredPricingImage =
+                                    "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PreferredPricing.svg";
+                                offer_content = `
+                    <a class="offer_link"
+                      href="`+ DestLink + `" rel=" noreferrer">
+                      <div class="offer_link_image">
+                          <img
+                              src="`+ PreferredPricingImage + `"
+                              alt="paintImage" height="44px" width="44px" loading="lazy">
+                      </div>
+                      <div class="offer_content">
+                          <div class="heading">
+                              <div>Preffered Pricing</div>
+                              <div>Unlocked</div>
+                          </div>
+                          <div class="offer_content_link">
+                              <u>Learn More</u>
+                          </div>    
+                      </div>
+                      <div class="offer_link_arrow">
+                        <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                       
+                      </div>
+                    </a>`;
+                            }
+
+                            //5.paint rewards available using paint rewards logic
+                            else {
+                                if (userData.customerInfo.paintMembershipLevel) {
+                                    let paintMembershipLevel = userData.customerInfo.paintMembershipLevel;
+                                    let paintImage = '';
+                                    let pagaraphContent = '';
+                                    let DestLink =
+                                        "https://www.homedepot.com/myaccount/proxtraprogramdetails";
+
+                                    if (paintMembershipLevel === "Member") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Member-square.svg";
+                                        pagaraphContent = `Saved Up To 20% <p style="font-weight:400;">After Qualifying Spend</p>`;
+                                    } else if (paintMembershipLevel === "Bronze") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Bronze-square.svg";
+                                        pagaraphContent = `Save Upto 10% <div>On Paint Products</div>`;
+                                    } else if (paintMembershipLevel === "Silver") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Silver-square.svg";
+                                        pagaraphContent = `Save Upto 15% <div>On Paint Products</div>`;
+                                    } else if (paintMembershipLevel === "Gold") {
+                                        paintImage =
+                                            "https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-PaintRewards-Gold-square.svg";
+                                        pagaraphContent = `Save Upto 20% <div>On Paint Products</div>`;
+                                    }
+                                    offer_content = `
+                    <a class="offer_link"
+                      href="`+ DestLink + `" rel=" noreferrer">
+                      <div class="offer_link_image">
+                          <img
+                              src="`+ paintImage + `"
+                              alt="paintImage" height="44px" width="44px" loading="lazy">
+                      </div>
+                      <div class="offer_content">
+                          <div class="heading">
+                              `+ pagaraphContent + `
+                          </div>
+                          <div class="offer_content_link">
+                              <u>View Paint Rewards</u>
+                          </div>    
+                      </div>
+                      <div class="offer_link_arrow">
+                        <svg class="link_arrow" xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                        
+                      </div>
+                    </a>`
+                                }
+                            }
                         }
                     }
-                }
-            }
-            catch (e) {
-                console.log(e)
-                offer_content = `
-            <a class="perk_completed" href="" rel=" noreferrer">
-              <div class="perk_completed_img">
-                  <img src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg" height="44px" width="44px" loading="lazy">
-              </div>
-              <div class="perk_completed_content">
-                  <div class="heading">
-                    <p style="width: 234px;height: 20px;color: #7A7978;font-size: 16px;font-style: normal;">Perks Status Unavailable</p>
-                  </div>
-                  <div class="perk_completed_content_link">
-                      <u>Refresh</u>
-                  </div>
-              </div>
-            </a>          
-          `
-            }
-            const offersContentEle = document.getElementById("offers_content");
-              console.log(new Date().toLocaleString() + new Date())
-             if (offersContentEle !== null)
-              {
-                 offersContentEle.innerHTML = offer_content;
-             }
-        };
+                    catch (e) {
+                        console.log(e)
+                        offer_content = `
+              <a class="perk_completed" href="" rel=" noreferrer">
+                <div class="perk_completed_img">
+                    <img src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/cardIcon-ProXtraPerks.svg" height="44px" width="44px" loading="lazy">
+                </div>
+                <div class="perk_completed_content">
+                    <div class="heading">
+                      <p style="width: 234px;height: 20px;color: #7A7978;font-size: 16px;font-style: normal;">Perks Status Unavailable</p>
+                    </div>
+                    <div class="perk_completed_content_link">
+                        <u>Refresh</u>
+                    </div>
+                </div>
+              </a>          
+            `
+                    }
+                    const offersContentEle = document.getElementById("offers_content");
+                    console.log(new Date().toLocaleString() + new Date())
+                    if (offersContentEle !== null) {
+                        offersContentEle.innerHTML = offer_content;
+                    }
+                };
 
-        const showHeaderContent = (usr) => {
-            
-            const headerSvgs = {
-                member: 'https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/tierBadge-Member-withArrow.svg',
-                vip: 'https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/tierBadge-VIP-withArrow.svg',
-                elite: 'https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/tierBadge-Elite-withArrow.svg'
-            }
-            let infoiconmsghtml = `<div class="hide_tippy" data-tippy-root="" id="tippy-2" style="z-index: 9999;visibility: visible;position: absolute;margin: 0px;left: -180px;top: 22px;width:600px;">
-                <div class="tippy-box thd-tooltip" data-state="visible" tabindex="-1" data-animation="fade" role="tooltip" data-placement="bottom" style="max-width: 500px; transition-duration: 300ms;">
-                  <div class="tippy-content" data-state="visible" style="transition-duration: 300ms;">
-                    <div><div>
-                    <div class="thd-react-tooltip__content ">
-                      <div class="LoyaltySummary__toolTipLabel">
-                        <p>Pro Xtra Loyalty Spend Includes transactions made with Pro Xtra ID or registered tender.</p>
-                        <p> Excludes taxes, shipping fees, returns, and gift card purchases.</p>
-                        <br><p>Savings includes amount saved from discounts on full price product,</p>
-                        <p>other markdowns, bulk discounts and Pro Xtra exclusive savings.</p><br>
-                        <p>For full details, see the&nbsp;
-                          <a href="https://www.homedepot.com/c/ProXtra_TermsandConditions" class="u__default-link" rel=" noreferrer">Pro Xtra Program Terms &amp; Conditions</a>
-                        </p>
+                const showHeaderContent = (usr) => {
+
+                    const headerSvgs = {
+                        member: 'https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/tierBadge-Member-withArrow.svg',
+                        vip: 'https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/tierBadge-VIP-withArrow.svg',
+                        elite: 'https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/tierBadge-Elite-withArrow.svg'
+                    }
+                    let infoiconmsghtml = `<div class="hide_tippy" data-tippy-root="" id="tippy-2" style="z-index: 9999;visibility: visible;position: absolute;margin: 0px;left: -180px;top: -228px;width:600px;">
+                  <div class="tippy-box thd-tooltip" data-state="visible" tabindex="-1" data-animation="fade" role="tooltip" data-placement="bottom" style="max-width: 500px; transition-duration: 300ms;">
+                    <div class="tippy-content" data-state="visible" style="transition-duration: 300ms;">
+                      <div><div>
+                      <div class="thd-react-tooltip__content ">
+                        <div class="LoyaltySummary__toolTipLabel">
+                          <p>Pro Xtra Loyalty Spend Includes transactions made with Pro Xtra ID or registered tender.</p>
+                          <p> Excludes taxes, shipping fees, returns, and gift card purchases.</p>
+                          <br><p>Savings includes amount saved from discounts on full price product,</p>
+                          <p>other markdowns, bulk discounts and Pro Xtra exclusive savings.</p><br>
+                          <p>For full details, see the&nbsp;
+                            <a href="https://www.homedepot.com/c/ProXtra_TermsandConditions" class="u__default-link" rel=" noreferrer">Pro Xtra Program Terms &amp; Conditions</a>
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="tippy-arrow" style="position: absolute; left: 0px; transform: translate(197.778px, 0px);"></div>
-              </div>
-              </div>`
+                <div class="tippy-arrow" style="transform: translate(197.778px, 0px);"></div>
+                </div>
+                </div>`
 
-            let template = `
-            <div class="welcome-card-wrapper col__12-12">
-                <section>
-                    <div class="wrapper">
-                        <header class="wrapper-page-header">
-                            <div class="grid" id="welcome_card_header_content">
-                                <a href="https://www.homedepot.com/myaccount/proxtraprogramdetails" rel=" noreferrer"
-                                    class="page-header-container">
-                                    <div class="header-banner">
-                                        <img
-                                            src="`+headerSvgs[usr.tierName.toLowerCase()]+`"
-                                            alt="header-icon" class="header-banner-image" height="auto" width="auto" loading="lazy">
-                                    </div>
-                                </a>
-                            </div>
-                        </header>
-                        <main>
-                            <div id="main_header_content">
-                                <div class="title-wrapper" id="title_wrapper">
-                                    <p class="title">
-                                        Welcome `+usr.firstName+`, `+usr.lastName+`
-                                    </p>    
-                                    <p class="address">
-                                        `+usr.companyName+`
-                                    </p>
-                                </div>
-                                <div class="loyalty-summary">
-                                    <div class="loyalty-summary-header">
-                                        <div class="loyalty-summary-header-line">
-                                            <div class="loyalty-summary__amt_spent">
-                                                <p class="loyalty-summary__amt_spent__value">$`+usr.proXtraLoyaltySpend+`</p>
-                                            </div>
-                                            <div class="loyalty-summary-label">Pro Xtra Loyalty Spend</div>
-                                        </div>
-                                    </div>
-                                    <div class="loyalty-summary__saving">
-                                        <div class="loyalty-summary__saving__amt">$`+usr.previousYearSavings+`</div>
-                                        <div class="loyalty-summary__spent_lbl">Savings
-                                               <span>
-                                              `+infoiconmsghtml+`
-                                              <img src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/icon-info.svg"
-                                                alt="info-icon" class="loyalty-summary__infoLogo" loading="lazy">
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="loyalty-body">
-                                <div class="loyalty-content-block" id="perks_content">
-                                   <div class="indvidual_content_loading">
-                                        <div class="loader">
-                                            <div class="loader_animation">
-                                                <div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div>Loading perk status</div>
-                                   </div>
-                                </div>
-                                <div class="loyalty-content-block" id="offers_content">
-                                   <div class="indvidual_content_loading">
-                                        <div class="loader">
-                                            <div class="loader_animation">
-                                                <div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div>Loading offer status</div>
-                                   </div>
-                                </div>
-                            </div>
-                        </main>
-                        <footer class="loyalty-footer">
-                            <a  class="footer-register" href="https://www.homedepot.com/b2b/account/view/paymentcards" rel=" noreferrer">
-                                <span>Register A Card and Save</span>
-                                <div class="svg_div">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                                
-                                </div>
-                            </a>
-                            <div class="footer-benefits">
-                                <a href="https://www.homedepot.com/myaccount/proxtraprogramdetails">
-                                <button class="footer-benefits__btn"
-                                tabindex="0">
-                                    <span class="bttn__content">View All Benefits</span>
-                                </button>
+                    let template = `
+              <div class="welcome-card-wrapper col__12-12">
+                  <section>
+                      <div class="wrapper">
+                          <header class="wrapper-page-header">
+                              <div class="grid" id="welcome_card_header_content">
+                                  <a href="https://www.homedepot.com/myaccount/proxtraprogramdetails" rel=" noreferrer"
+                                      class="page-header-container">
+                                      <div class="header-banner">
+                                          <img
+                                              src="`+ headerSvgs[usr.tierName.toLowerCase()] + `"
+                                              alt="header-icon" class="header-banner-image" height="auto" width="auto" loading="lazy">
+                                      </div>
                                   </a>
-                            </div>
-                        </footer>
-                    </div>
-                </section>
-            </div> `;
-            console.log(template)
-           document.querySelector("#root > div > div > div > div:nth-child(4) > div").innerHTML = template;
-         //   containerEle.innerHTML = template;
-            console.log(new Date().toLocaleString() + new Date())
-            console.log(document.getElementById("perks_content"))
-        }
-        try {
-
-            /// Page load so, so the loading screen
-            containerEle.innerHTML = loaderHtml;
-
-            const { u, t } = extractUserInfoData();
-            let userId = u;
-            let customerAccountId = t;
-            let cookieToken = "THD_CUSTOMER=" + getCookie("THD_CUSTOMER");
-
-            const userDataPromise = fetchUserData(userId, customerAccountId, cookieToken);
-
-            const userfetchPerks = fetchPerks(userId, customerAccountId, cookieToken);
-
-            userDataPromise.then((userData) => {
-                if (typeof userData != "undefined" && userData != null && userData.proTiers != null) 
-                {
-                    /// User data is success, Format the header part of UI...and show it.
-                    let userObj = {};
-                    userObj.tierName = userData.proTiers.currentTierName;
-                    userObj.firstName = userData.userProfile.name.firstName;
-                    userObj.lastName = userData.userProfile.name.lastName;
-                    userObj.companyName = userData.customerInfo.companyName;
-                    userObj.proXtraLoyaltySpend =
-                        userData.proXtraSpend.totalCurrentYearSpend;
-                    userObj.previousYearSavings =
-                        userData.proXtraSpend.totalCurrentYearSavings;
-                    /// Mount header content...
-                    
-                   // console.log(userObj)
-                  
-                   
-                    
-                        userfetchPerks.then((userPerk) => 
-                        {
-                             showHeaderContent(userObj);
-
-                              console.log(userData)
-                              console.log(userPerk)   
-                             checkForOffer(userData, userPerk);
-                             checkForPerk(userData, userPerk);
-                           
-                           
-                           
-                        });
-                    
-                    userfetchPerks.catch((error) =>
-                        console.error("error while fetching user data", error)
-                    );
-                } else 
-                {
-                    throw new Error("Not able to load...");
+                              </div>
+                          </header>
+                          <main>
+                              <div id="main_header_content">
+                                  <div class="title-wrapper" id="title_wrapper">
+                                      <p class="title">
+                                          Welcome `+ usr.firstName + `, ` + usr.lastName + `
+                                      </p>    
+                                      <p class="address">
+                                          `+ usr.companyName + `
+                                      </p>
+                                  </div>
+                                  <div class="loyalty-summary">
+                                      <div class="loyalty-summary-header">
+                                          <div class="loyalty-summary-header-line">
+                                              <div class="loyalty-summary__amt_spent">
+                                                  <p class="loyalty-summary__amt_spent__value">$`+ usr.proXtraLoyaltySpend + `</p>
+                                              </div>
+                                              <div class="loyalty-summary-label">Pro Xtra Loyalty Spend</div>
+                                          </div>
+                                      </div>
+                                      <div class="loyalty-summary__saving">
+                                          <div class="loyalty-summary__saving__amt">$`+ usr.previousYearSavings + `</div>
+                                          <div class="loyalty-summary__spent_lbl">Savings
+                                                 <span id="tnt_test_info">
+                                                
+                                                 </span>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="loyalty-body">
+                                  <div class="loyalty-content-block" id="perks_content">
+                                     <div class="indvidual_content_loading">
+                                          <div class="loader">
+                                              <div class="loader_animation">
+                                                  <div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div>Loading perk status</div>
+                                     </div>
+                                  </div>
+                                  <div class="loyalty-content-block" id="offers_content">
+                                     <div class="indvidual_content_loading">
+                                          <div class="loader">
+                                              <div class="loader_animation">
+                                                  <div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          <div>Loading offer status</div>
+                                     </div>
+                                  </div>
+                              </div>
+                          </main>
+                          <footer class="loyalty-footer">
+                              <a  class="footer-register" href="https://www.homedepot.com/b2b/account/view/paymentcards" rel=" noreferrer">
+                                  <span>Register A Card and Save</span>
+                                  <div class="svg_div">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="9" height="13" fill="none"><path d="m1.883 1.467 4.835 5.012-4.81 4.988" stroke="#000000" stroke-width="2"></path></svg>                                
+                                  </div>
+                              </a>
+                              <div class="footer-benefits">
+                                  <a href="https://www.homedepot.com/myaccount/proxtraprogramdetails">
+                                  <button class="footer-benefits__btn"
+                                  tabindex="0">
+                                      <span class="bttn__content">View All Benefits</span>
+                                  </button>
+                                    </a>
+                              </div>
+                          </footer>
+                      </div>
+                  </section>
+              </div> `;
+                  let tntinfo = document.querySelector("#root > div > div > div > div:nth-child(4) > div > div > section > div > main > div:nth-child(1) > div > div > div > div.LoyaltySummary__spendLabel > span ")
+                
+                    document.querySelector("#root > div > div > div > div:nth-child(4) > div").innerHTML = template;
+                    //   containerEle.innerHTML = template;
+                    if(tntinfo !== null)
+                    {
+                     document.querySelector("#tnt_test_info").appendChild(tntinfo)
+                    }
+                    else{
+                        let infodata= infoiconmsghtml + `
+                                                <img src="https://assets.thdstatic.com/images/v1/loyaltyBenefits/ProTiers/icon-info.svg"
+                                                  alt="info-icon" class="loyalty-summary__infoLogo" loading="lazy">`
+                        document.querySelector("#tnt_test_info").innerHTML= infodata;
+                      
+                    }
                 }
-            });
-            userDataPromise.catch((error) => {
-                /// Something went wrong so the module failed screen...
-                containerEle.innerHTML = moduleFailedHtml;
-                console.error("error while fetching user data", error)
-            });
+                try {
+
+                    /// Page load so, so the loading screen
+                    containerEle.innerHTML = loaderHtml;
+
+                    const { u, t } = extractUserInfoData();
+                    let userId = u;
+                    let customerAccountId = t;
+                    let cookieToken = "THD_CUSTOMER=" + getCookie("THD_CUSTOMER");
+
+                    const userDataPromise = fetchUserData(userId, customerAccountId, cookieToken);
+
+                    const userfetchPerks = fetchPerks(userId, customerAccountId, cookieToken);
+
+                    userDataPromise.then((userData) => {
+                        if (typeof userData != "undefined" && userData != null && userData.proTiers != null) {
+                            /// User data is success, Format the header part of UI...and show it.
+                            let userObj = {};
+                            userObj.tierName = userData.proTiers.currentTierName;
+                            userObj.firstName = userData.userProfile.name.firstName;
+                            userObj.lastName = userData.userProfile.name.lastName;
+                            userObj.companyName = userData.customerInfo.companyName;
+                            userObj.proXtraLoyaltySpend =
+                                userData.proXtraSpend.totalCurrentYearSpend;
+                            userObj.previousYearSavings =
+                                userData.proXtraSpend.totalCurrentYearSavings;
+                            /// Mount header content...
+
+                            // console.log(userObj)
+
+
+
+                            userfetchPerks.then((userPerk) => {
+                                showHeaderContent(userObj);
+
+                                console.log(userData)
+                                console.log(userPerk)
+                                checkForOffer(userData, userPerk);
+                                checkForPerk(userData, userPerk);
+
+
+
+                            });
+
+                            userfetchPerks.catch((error) =>
+                                console.error("error while fetching user data", error)
+                            );
+                        } else {
+                            throw new Error("Not able to load...");
+                        }
+                    });
+                    userDataPromise.catch((error) => {
+                        /// Something went wrong so the module failed screen...
+                        containerEle.innerHTML = moduleFailedHtml;
+                        console.error("error while fetching user data", error)
+                    });
+                }
+
+                catch (e) {
+                    /// Something went wrong so the module failed screen...
+                    containerEle.innerHTML = moduleFailedHtml;
+                }
+            }
         }
         
-        catch (e) {
-            /// Something went wrong so the module failed screen...
-            containerEle.innerHTML = moduleFailedHtml;
-        }}
-    }
-        if (evt && evt.animationName === "welcomeCard11"){
-            if (!hasRun) {
-                // do something
-                hasRun = true;
-                  console.log("welcomeCard")
-                console.log(new Date().toLocaleString() + new Date())
-            }
-          
-        }
 
-}
+    }
     document.addEventListener("animationstart", init, false);
     document.addEventListener("MSAnimationStart", init, false);
     document.addEventListener("webkitAnimationStart", init, false);
 </script>
 <style>
-/* .parent{
-    width: 100%;
-} */
-.welcome-card-wrapper {
-    background-color: #fff;
-    color: #333;
-    min-height: 516px;
-    width: 334px;
-}
-.wrapper{
-    display: flex;
-    flex-direction: column;
-    padding:8px;
-}
-.page-header-container {
-    margin: 6px 5px 46px 0;
-}
-.wrapper-page-header {
-    font-family: helvetica-neue-light,Helvetica Neue,Helvetica,Arial,sans-serif;
-    font-size: 3.6rem;
-    line-height: 3.6rem;
-    clear: both;
-    padding-bottom: 10px;
-}
-.header-banner {
-    left: -1px;
-    display: inline-flex;
-    flex-direction: row-reverse;
-    height: 35px;
-    position: absolute;
-    right: 4px;
-    width: 98.5%;
-}
-.header-banner-image {
-    margin-left: -2px;
-    height: 36px;
-}
-.member-background {
-    background-color: #f96302;
-    width: 100%;
-    display: inline-flex;
-    padding: 0 0 5px 16px;
-}
-.member-background-color-VIP {
-    background-color: #666;
-}
-.member-background-color-Elite {
-    background-color: #666;
-}
-.proxtraLogo {
-    position: relative;
-}
-.badge-text-tier {
-    color: #fff;
-    font-size: 20px;
-    margin: 0 10px 0 8px;
-    font-family: helvetica-neue-heavy-condensed,Helvetica Neue,Helvetica,Arial,sans-serif;
-}
-.loyalty-summary{
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    margin-top: 12px;
-    width: 334px;
-    height: 68px;
-}
-.loyalty-summary-header {
-    padding-left: unset;
-}
-.loyalty-summary-header-line {
-    box-sizing: border-box;
-
-    /* Auto layout */
-
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0px 16px 0px 0px;
-    gap: 4px;
-
-    width: 181px;
-    height: 52px;
-
-    /* UI/Border/Primary
-
-    Primary border for aesthetic and decorative UI (not intractable).
-
-    Token: border-colors-primary
-    Reference: gray-2
-    */
-    border-right: 1px solid #CCCCCB;
-}
-.loyalty-summary__amt_spent {
-    line-height: 16px;
-    font-size: 125%;
-}
-.loyalty-summary__amt_spent__value {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -ms-text-overflow: ellipsis;
-    white-space: nowrap;
-    display: block;
-    word-wrap: break-word;
-    text-align: left;
-    font-family: helvetica-neue-bold,Helvetica Neue,Helvetica,Arial,sans-serif;
-    font-weight: 700;
-}
-.loyalty-summary-label {
-    font-size: 14px;
-    font-family: helvetica-neue,Helvetica Neue,Helvetica,Arial,sans-serif;
-    line-height: 24px;
-    letter-spacing: -.09px;
-}
-.loyalty-summary__infoLogo {
-    width: 16px;
-    height: 16px;
-    bottom: 1px;
-    left: 8px;
-    position: relative;
-    display: inline-block;
-}
-.loyalty-summary__saving {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0px 0px 0px 16px;
-    gap: 4px;
-    width: 135.64px;
-    height: 51px;
-}
-.loyalty-summary__saving__amt {
-    font-family: helvetica-neue-bold,Helvetica Neue,Helvetica,Arial,sans-serif;
-    line-height: 25px;
-    color: #00b85f;
-    bottom: 10px;
-    font-size: 22px;
-    font-weight: 700;
-}
-.loyalty-summary{
-    display: flex;
-}
-.loyalty-summary__spent_lbl {
-    font-size: 14px;
-    font-family: helvetica-neue,Helvetica Neue,Helvetica,Arial,sans-serif;
-    line-height: 24px;
-    letter-spacing: -.09px;
-}
-.loyalty-body {
-    width: 100%;
-    background-color: #fff;
-    display: flex;
-    flex-direction: column;
-}
-.loyalty-body .loyalty-content-block {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    width: 302px;
-    background: #FFFFFF;
-}
-.loyalty-body .offer_link {
-    /* Auto layout */
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 12px 0px;
-    gap: 20px;
-    width: 302px;
-    height: 72px;
-    /* UI/Background Fill/Background Primary
-    
-    Token: background-colors-primary
-    */
-    background: #FFFFFF;
-}
-.loyalty-body .offer_link_image {
-    height: 48px;
-    width: 48px;
-}
-.loyalty-body .perk_completed_img{
-    height: 48px;
-    width: 48px;
-}
-.loyalty-body .offer_content {
-    display: flex;
-    flex-direction: column;
-    width: 198px;
-    height: 48px;
-    
-    /* Body/Base Bold/tight line height
-    
-    16px, 75 Bold
-    */
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 150%;
-    /* or 24px */
-    
-    
-    /* Grays/Dark */
-    
-    color: #333333;
-}
-.loyalty-body .circle-count-main {
-    cursor: pointer;
-    line-height: 23px;
-    position: absolute;
-    right: 25px;
-}
-.loyalty-body .circle-count {
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-family: helvetica-neue-black-condensed,Helvetica Neue,Helvetica,Arial,sans-serif;
-    width: 22px;
-    height: 22px;
-    background-color: #f16422;
-    font-size: 12px;
-}
-.loyalty-footer {
-    color: #333;
-    margin-bottom: 15px;
-    margin-top: 12px;
-    display: flex;
-    flex-direction: column;
-}
-
-.title-wrapper{
-    display: flex;
-    flex-direction: column;
-    
-}
-.title-wrapper .title{
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 20px;
-    width: 318px;
-    height: 23px;
-    color: #333333;
-    
-    /* Inside auto layout */
-    flex: none;
-    order: 0;
-    align-self: stretch;
-    flex-grow: 0;
-}
-.title-wrapper .address{
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 20px;
-    color: #333333;
-    flex: none;
-    order: 1;
-    align-self: stretch;
-    flex-grow: 0;
-}
-.footer-register {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 9px 8px 9px 16px;
-    margin-top: 12px;
-    width: 302px;
-    height: 42px;
-    
-    /* UI/Border/Primary
-    
-    Primary border for aesthetic and decorative UI (not intractable).
-    
-    Token: border-colors-primary
-    Reference: gray-2
-    */
-    border: 1px solid #CCCCCB;    
-}
-.footer-register span{
-    width: 183px;
-    height: 20px;
-
-    /* Body/Base/tight line height
-
-    16px, 55 Roman
-    */
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 125%;
-    /* identical to box height, or 20px */
-
-    display: flex;
-    align-items: flex-end;
-
-    /* Grays/Dark */
-
-    color: #333333;
-
-}
-.footer-register .svg_div{
-    margin-left: 78px;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    height: 100%;
-    justify-content: center;
-}
-
-.footer-benefits{
-    box-sizing: border-box;
-
-    /* Auto layout */
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 16px;
-    gap: 10px;
-    margin-top: 16px;
-    width: 302px;
-    height: 44px;
-
-    /* UI/Button/Secondary
-
-    Token: button-colors-background-secondary
-    */
-    background: #FFFFFF;
-    /* UI/Border/Accent
-
-    Token: border-colors-accent
-    Reference: colors-brand
-    */
-    border: 2px solid #F96302;
-    border-radius: 2px;
-
-}
-.footer-benefits__btn .bttn__content{
-    width: 128px;
-    height: 24px;
-
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 150%;
-    /* identical to box height, or 24px */
-
-    display: flex;
-    align-items: center;
-    text-align: center;
-
-    color: #F96302;
-
-}
-/*ELITE*/
-.banner-member-background-color-Elite {
-    background-color: #C14C00;
-}
-/* MEMEBER*/
-.banner-member-background{
-    background-color: #f96302;
-    width: 100%;
-    display: inline-flex;
-    padding: 0 0 5px 16px;
-}
-.perk_completed{
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 12px 0px;
-    gap: 20px;
-    width: 302px;
-    height: 96px;
-    /* UI/Background Fill/Background Primary
-
-    Token: background-colors-primary
-    */
-    background: #FFFFFF;
-}
-.perk_completed_content{
-    display: flex;
-    flex-direction: column;
-    width: 198px;
-    height: 48px;
-    
-    /* Body/Base Bold/tight line height
-    
-    16px, 75 Bold
-    */
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 150%;
-    /* or 24px */
-    
-    
-    /* Grays/Dark */
-    
-    color: #333333;
-}
-.perk_completed_content .heading{
-    font-size: 16px;
-    font-weight: 700;
-}
-.offer_content .heading{
-    font-size: 16px;
-    font-weight: 700;
-}
-.perk_completed_content .desc{
-    font-size: 16px;
-    font-weight: 400;
-}
-.perk_completed_content_link{
-    font-size: 16px;
-    font-weight: 400;
-}
-.offer_content_link{
-    font-size: 16px;
-    font-weight: 400;
-}
-.perk_completed_arrow{
-    display: flex;
-    align-items: start;
-    justify-content: center;
-    height: 100%;
-}
-.offer_link_arrow{
-    display: flex;
-    align-items: start;
-    justify-content: center;
-    height: 100%;
-}
-.indvidual_content_loading{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 12px 0px;
-    gap: 20px;
-    
-    width: 302px;
-    height: 72px;
-    
-    /* UI/Background Fill/Background Primary
-    
-    Token: background-colors-primary
-    */
-    background: #FFFFFF;
-    
-    /* Inside auto layout */
-    
-    flex: none;
-    order: 1;
-    flex-grow: 0;    
-}
-
-/***===========LOADER =============**/
-
-.loader_wrapper{
-    width: 100%;
-    height: 100%;
-    display: flex;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-}
-@keyframes loader_animation {
-  0% { transform: translate(-50%,-50%) rotate(0deg); }
-  100% { transform: translate(-50%,-50%) rotate(360deg); }
-}
-.loader_animation div {
-  position: absolute;
-  width: 66px;
-  height: 66px;
-  border: 4px solid #f96302;
-  border-top-color: transparent;
-  border-radius: 50%;
-}
-.loader_animation div {
-  animation: loader_animation 1s linear infinite;
-  top: 50px;
-  left: 50px
-}
-.loader {
-  width: 54px;
-  height: 54px;
-  display: inline-block;
-  background: none;
-}
-.loader_animation {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform: translateZ(0) scale(0.54);
-  backface-visibility: hidden;
-  transform-origin: 0 0;
-}
-.loader_animation div { box-sizing: content-box; }
-
-/*=============== MODULE FAILED ===============*/
-.module_failed_wrapper{
-    display: flex;
-    justify-content: center;
-    background-color: #fff;
-    color: #333;
-    height: 516px;
-    width: 334px;
-    align-items: center;
-}
-.module_failed_content{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-.module_failed_img_container{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-}
-.module_failed_img_container img{
-    margin-bottom: 24px;
-}
-.module_failed_img_container_label{
-
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 125%;
-    text-align: center;
-    color: #121111;
-    flex: none;
-    width: 200px;
-    margin-bottom: 24px;
-}
-.module_failed_refresh_container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-.module_failed_refresh_container_img{
-    margin-bottom: 16px;
-}
-.module_failed_refresh__btn span{
-    width: 48px;
-    height: 18px;
-    font-family: Helvetica Neue LT Pro;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 18px;
-    text-align: center;
-    letter-spacing: -0.01px;
-    text-decoration-line: underline;
-    color: #212120;
-}
-
-/** 6th STAGE PERK **/
-.perks_content_progressPerk__svg {
-    height: 100%;
-    transform: rotate(133deg);
-    transform-origin: center;
-    width: 100%;
-}
-.perks_content_progressPerk__circle {
-    stroke: #ccc;
-    fill: none;
-    stroke-width: 16px;
-    stroke-dasharray: 314px;
-    stroke-linecap: round;
-    stroke-dashoffset: 87;
-}
-.perks_content_circle_border {
-    fill: none;
-    stroke-width: 21px;
-    stroke-dasharray: 326px;
-    stroke-linecap: round;
-    stroke-dashoffset: 268;
-} 
-.perks_content_progressPerk__circleProgress {
-    fill: none;
-    stroke-width: 16px;
-    stroke-dasharray: 300px;
-    stroke-linecap: round;
-    stroke-dashoffset: 234;
-}
-.perks_content_circle-animate {
-    animation: PerkStroke 1.3s ease-in both;
-    -webkit-animation: PerkStroke 1.3s ease-in both;
-    -moz-animation: PerkStroke 1.3s ease-in both;
-}
-
-.perk_circleSmallDot{
-    transform: rotate(-95deg);
-    fill: #F96302;
-    stroke-width: 7px;
-    stroke: #fff;
-    color: #ccc;
-    transform: -220deg;
-    transform-origin: 50% 50%;
-}
-@keyframes PerkStroke {
-    0% {
-        stroke-dashoffset: 299;
+    /* .parent{
+      width: 100%;
+  } */
+    .welcome-card-wrapper {
+        background-color: #fff;
+        color: #333;
+        min-height: 516px;
+        width: 334px;
     }
-}
-.loyalty-summary__spent_lbl span{
-    position: relative;
-}
-.loyalty-summary__spent_lbl span:hover .hide_tippy {
-    display: block;
-}
-.hide_tippy{
-    display: none;
-} 
-@keyframes welcomeCard {
+
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        padding: 8px;
+    }
+
+    .page-header-container {
+        margin: 6px 5px 46px 0;
+    }
+
+    .wrapper-page-header {
+        font-family: helvetica-neue-light, Helvetica Neue, Helvetica, Arial, sans-serif;
+        font-size: 3.6rem;
+        line-height: 3.6rem;
+        clear: both;
+        padding-bottom: 10px;
+    }
+
+    .header-banner {
+        left: -1px;
+        display: inline-flex;
+        flex-direction: row-reverse;
+        height: 35px;
+        position: absolute;
+        right: 4px;
+        width: 98.5%;
+    }
+
+    .header-banner-image {
+        margin-left: -2px;
+        height: 36px;
+    }
+
+    .member-background {
+        background-color: #f96302;
+        width: 100%;
+        display: inline-flex;
+        padding: 0 0 5px 16px;
+    }
+
+    .member-background-color-VIP {
+        background-color: #666;
+    }
+
+    .member-background-color-Elite {
+        background-color: #666;
+    }
+
+    .proxtraLogo {
+        position: relative;
+    }
+
+    .badge-text-tier {
+        color: #fff;
+        font-size: 20px;
+        margin: 0 10px 0 8px;
+        font-family: helvetica-neue-heavy-condensed, Helvetica Neue, Helvetica, Arial, sans-serif;
+    }
+
+    .loyalty-summary {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        margin-top: 12px;
+        width: 334px;
+        height: 68px;
+    }
+
+    .loyalty-summary-header {
+        padding-left: unset;
+    }
+
+    .loyalty-summary-header-line {
+        box-sizing: border-box;
+
+        /* Auto layout */
+
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0px 16px 0px 0px;
+        gap: 4px;
+
+        width: 181px;
+        height: 52px;
+
+        /* UI/Border/Primary
+  
+      Primary border for aesthetic and decorative UI (not intractable).
+  
+      Token: border-colors-primary
+      Reference: gray-2
+      */
+        border-right: 1px solid #CCCCCB;
+    }
+
+    .loyalty-summary__amt_spent {
+        line-height: 16px;
+        font-size: 125%;
+    }
+
+    .loyalty-summary__amt_spent__value {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -ms-text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+        word-wrap: break-word;
+        text-align: left;
+        font-family: helvetica-neue-bold, Helvetica Neue, Helvetica, Arial, sans-serif;
+        font-weight: 700;
+    }
+
+    .loyalty-summary-label {
+        font-size: 14px;
+        font-family: helvetica-neue, Helvetica Neue, Helvetica, Arial, sans-serif;
+        line-height: 24px;
+        letter-spacing: -.09px;
+    }
+
+    .loyalty-summary__infoLogo {
+        width: 16px;
+        height: 16px;
+        bottom: 1px;
+        left: 8px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .loyalty-summary__saving {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0px 0px 0px 16px;
+        gap: 4px;
+        width: 135.64px;
+        height: 51px;
+    }
+
+    .loyalty-summary__saving__amt {
+        font-family: helvetica-neue-bold, Helvetica Neue, Helvetica, Arial, sans-serif;
+        line-height: 25px;
+        color: #00b85f;
+        bottom: 10px;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .loyalty-summary {
+        display: flex;
+    }
+
+    .loyalty-summary__spent_lbl {
+        font-size: 14px;
+        font-family: helvetica-neue, Helvetica Neue, Helvetica, Arial, sans-serif;
+        line-height: 24px;
+        letter-spacing: -.09px;
+    }
+
+    .loyalty-body {
+        width: 100%;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .loyalty-body .loyalty-content-block {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
+        width: 302px;
+        background: #FFFFFF;
+    }
+
+    .loyalty-body .offer_link {
+        /* Auto layout */
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 12px 0px;
+        gap: 20px;
+        width: 302px;
+        height: 72px;
+        /* UI/Background Fill/Background Primary
+      
+      Token: background-colors-primary
+      */
+        background: #FFFFFF;
+    }
+
+    .loyalty-body .offer_link_image {
+        height: 48px;
+        width: 48px;
+    }
+
+    .loyalty-body .perk_completed_img {
+        height: 48px;
+        width: 48px;
+    }
+
+    .loyalty-body .offer_content {
+        display: flex;
+        flex-direction: column;
+        width: 198px;
+        height: 48px;
+
+        /* Body/Base Bold/tight line height
+      
+      16px, 75 Bold
+      */
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 150%;
+        /* or 24px */
+
+
+        /* Grays/Dark */
+
+        color: #333333;
+    }
+
+    .loyalty-body .circle-count-main {
+        cursor: pointer;
+        line-height: 23px;
+        position: absolute;
+        right: 25px;
+    }
+
+    .loyalty-body .circle-count {
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-family: helvetica-neue-black-condensed, Helvetica Neue, Helvetica, Arial, sans-serif;
+        width: 22px;
+        height: 22px;
+        background-color: #f16422;
+        font-size: 12px;
+    }
+
+    .loyalty-footer {
+        color: #333;
+        margin-bottom: 15px;
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .title-wrapper {
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    .title-wrapper .title {
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 20px;
+        width: 318px;
+        height: 23px;
+        color: #333333;
+
+        /* Inside auto layout */
+        flex: none;
+        order: 0;
+        align-self: stretch;
+        flex-grow: 0;
+    }
+
+    .title-wrapper .address {
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 20px;
+        color: #333333;
+        flex: none;
+        order: 1;
+        align-self: stretch;
+        flex-grow: 0;
+    }
+
+    .footer-register {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 9px 8px 9px 16px;
+        margin-top: 12px;
+        width: 302px;
+        height: 42px;
+
+        /* UI/Border/Primary
+      
+      Primary border for aesthetic and decorative UI (not intractable).
+      
+      Token: border-colors-primary
+      Reference: gray-2
+      */
+        border: 1px solid #CCCCCB;
+    }
+
+    .footer-register span {
+        width: 183px;
+        height: 20px;
+
+        /* Body/Base/tight line height
+  
+      16px, 55 Roman
+      */
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 125%;
+        /* identical to box height, or 20px */
+
+        display: flex;
+        align-items: flex-end;
+
+        /* Grays/Dark */
+
+        color: #333333;
+
+    }
+
+    .footer-register .svg_div {
+        margin-left: 84px;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+    }
+
+    .footer-benefits {
+        box-sizing: border-box;
+
+        /* Auto layout */
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 8px 16px;
+        gap: 10px;
+        margin-top: 16px;
+        width: 302px;
+        height: 44px;
+
+        /* UI/Button/Secondary
+  
+      Token: button-colors-background-secondary
+      */
+        background: #FFFFFF;
+        /* UI/Border/Accent
+  
+      Token: border-colors-accent
+      Reference: colors-brand
+      */
+        border: 2px solid #F96302;
+        border-radius: 2px;
+
+    }
+
+    .footer-benefits__btn .bttn__content {
+        width: 128px;
+        height: 24px;
+
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 150%;
+        /* identical to box height, or 24px */
+
+        display: flex;
+        align-items: center;
+        text-align: center;
+
+        color: #F96302;
+
+    }
+
+    /*ELITE*/
+    .banner-member-background-color-Elite {
+        background-color: #C14C00;
+    }
+
+    /* MEMEBER*/
+    .banner-member-background {
+        background-color: #f96302;
+        width: 100%;
+        display: inline-flex;
+        padding: 0 0 5px 16px;
+    }
+
+    .perk_completed {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 12px 0px;
+        gap: 20px;
+        width: 302px;
+        height: 96px;
+        /* UI/Background Fill/Background Primary
+  
+      Token: background-colors-primary
+      */
+        background: #FFFFFF;
+    }
+
+    .perk_completed_content {
+        display: flex;
+        flex-direction: column;
+        width: 198px;
+        height: 48px;
+
+        /* Body/Base Bold/tight line height
+      
+      16px, 75 Bold
+      */
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 150%;
+        /* or 24px */
+
+
+        /* Grays/Dark */
+
+        color: #333333;
+    }
+
+    .perk_completed_content .heading {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .offer_content .heading {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .perk_completed_content .desc {
+        font-size: 16px;
+        font-weight: 400;
+    }
+
+    .perk_completed_content_link {
+        font-size: 16px;
+        font-weight: 400;
+    }
+
+    .offer_content_link {
+        font-size: 16px;
+        font-weight: 400;
+    }
+
+    .perk_completed_arrow {
+        display: flex;
+        align-items: start;
+        justify-content: center;
+        height: 100%;
+       
+    }
+
+    .offer_link_arrow {
+        display: flex;
+        align-items: start;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .indvidual_content_loading {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 12px 0px;
+        gap: 20px;
+
+        width: 302px;
+        height: 72px;
+
+        /* UI/Background Fill/Background Primary
+      
+      Token: background-colors-primary
+      */
+        background: #FFFFFF;
+
+        /* Inside auto layout */
+
+        flex: none;
+        order: 1;
+        flex-grow: 0;
+    }
+  .link_arrow{
+     margin-top:21px ;
+  }
+    /***===========LOADER =============**/
+
+    .loader_wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+    }
+
+    @keyframes loader_animation {
+        0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+
+        100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+        }
+    }
+
+    .loader_animation div {
+        position: absolute;
+        width: 66px;
+        height: 66px;
+        border: 4px solid #f96302;
+        border-top-color: transparent;
+        border-radius: 50%;
+    }
+
+    .loader_animation div {
+        animation: loader_animation 1s linear infinite;
+        top: 50px;
+        left: 50px
+    }
+
+    .loader {
+        width: 54px;
+        height: 54px;
+        display: inline-block;
+        background: none;
+    }
+
+    .loader_animation {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform: translateZ(0) scale(0.54);
+        backface-visibility: hidden;
+        transform-origin: 0 0;
+    }
+
+    .loader_animation div {
+        box-sizing: content-box;
+    }
+
+    /*=============== MODULE FAILED ===============*/
+    .module_failed_wrapper {
+        display: flex;
+        justify-content: center;
+        background-color: #fff;
+        color: #333;
+        height: 516px;
+        width: 334px;
+        align-items: center;
+    }
+
+    .module_failed_content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .module_failed_img_container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+
+    .module_failed_img_container img {
+        margin-bottom: 24px;
+    }
+
+    .module_failed_img_container_label {
+
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 125%;
+        text-align: center;
+        color: #121111;
+        flex: none;
+        width: 200px;
+        margin-bottom: 24px;
+    }
+
+    .module_failed_refresh_container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .module_failed_refresh_container_img {
+        margin-bottom: 16px;
+    }
+
+    .module_failed_refresh__btn span {
+        width: 48px;
+        height: 18px;
+        font-family: Helvetica Neue LT Pro;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 18px;
+        text-align: center;
+        letter-spacing: -0.01px;
+        text-decoration-line: underline;
+        color: #212120;
+    }
+
+    /** 6th STAGE PERK **/
+    .perks_content_progressPerk__svg {
+        height: 100%;
+        transform: rotate(133deg);
+        transform-origin: center;
+        width: 100%;
+    }
+
+    .perks_content_progressPerk__circle {
+        stroke: #ccc;
+        fill: none;
+        stroke-width: 16px;
+        stroke-dasharray: 314px;
+        stroke-linecap: round;
+        stroke-dashoffset: 87;
+    }
+
+    .perks_content_circle_border {
+        fill: none;
+        stroke-width: 21px;
+        stroke-dasharray: 326px;
+        stroke-linecap: round;
+        stroke-dashoffset: 340;
+    }
+
+    .perks_content_progressPerk__circleProgress {
+        fill: none;
+        stroke-width: 16px;
+        stroke-dasharray: 300px;
+        stroke-linecap: round;
+        /* stroke-dashoffset: 300px; */
+    }
+
+    /* .perks_content_circle-animate {
+      animation: PerkStroke 1.3s ease-in both;
+      -webkit-animation: PerkStroke 1.3s ease-in both;
+      -moz-animation: PerkStroke 1.3s ease-in both;
+  } */
+
+    .perk_circleSmallDot {
+        transform: rotate(-95deg);
+        fill: #F96302;
+        stroke-width: 7px;
+        stroke: #fff;
+        color: #ccc;
+        transform: -220deg;
+        transform-origin: 50% 50%;
+    }
+
+    /* @keyframes PerkStroke {
+      0% {
+          stroke-dashoffset: 299;
+      }
+  } */
+    .loyalty-summary__spent_lbl span {
+        position: relative;
+    }
+
+    .loyalty-summary__spent_lbl span:hover .hide_tippy {
+        display: block;
+    }
+
+    .hide_tippy {
+        display: none;
+    }
+
+    @keyframes welcomeCard {
         from {
             opacity: 0.99;
         }
@@ -1535,8 +1607,9 @@
             opacity: 1;
         }
     }
-.LoyaltySummary__noSummaryLine {
-          animation:  0.001s;
-          animation-name: welcomeCard;
-}
+
+    .LoyaltySummary__noSummaryLine {
+        animation: 0.001s;
+        animation-name: welcomeCard;
+    }
 </style>
